@@ -75,8 +75,9 @@ if __name__ == "__main__":
         transcriptions.append(transcription)
         print(f"\tUnique forms: {unique_forms[-1]}")
 
+    unique_forms = ["|".join(form) for form in unique_forms]
     dataset = dataset.add_column("transcription", transcriptions)
-    dataset = dataset.add_column("unique_forms", "|".join(unique_forms))
+    dataset = dataset.add_column("unique_forms", unique_forms)
     dataset = dataset.remove_columns(["audio"])
 
     dataset.to_csv("data/vte/transcriptions.csv")
