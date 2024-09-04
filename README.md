@@ -5,7 +5,9 @@ This repository contains the experiments for my master's thesis \<TITLE HERE\>. 
 
 ### Verbal Transformation Effect
 
-For initial experiments, we use the same repeating stimuli from Warren (1968) and a set of pre-trained speech-to-text models: Wav2Vec2... [add more as you experiment] 
+For initial experiments, we use the same repeating stimuli from Warren (1968) and a set of pre-trained speech-to-text models: Wav2Vec2 and Wav2Vec2BERT with connectionist temporal classification, Whisper with conditional generation. 
+
+Conventional speech-to-text models do not show the verbal transformation effect (as far as the simple experiments go). This is in line with the spreading activations and habituation hypotheses for verbal transformations. Maybe try out [continous integrate and fire](https://github.com/MingLunHan/CIF-PyTorch) models which are more biologically plausible and may show effects like habituation.
 
 **TODO:**
 - [x] Wav2Vec2ForCTC - No effect observed
