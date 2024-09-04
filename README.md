@@ -8,10 +8,10 @@ This repository contains the experiments for my master's thesis \<TITLE HERE\>. 
 For initial experiments, we use the same repeating stimuli from Warren (1968) and a set of pre-trained speech-to-text models: Wav2Vec2... [add more as you experiment] 
 
 **TODO:**
-- [x] Wav2Vec2ForCTC
-- [ ] Wav2Vec2BertForCTC
+- [x] Wav2Vec2ForCTC - No effect observed
+- [x] Wav2Vec2BertForCTC - No effect observed
 - [ ] Wav2Vec2ConformerForCTC
-- [ ] WhisperForConditionalGeneration
+- [x] WhisperForConditionalGeneration - No effect observed
 
 
 # References
