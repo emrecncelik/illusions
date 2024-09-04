@@ -1,6 +1,5 @@
 import os
 import torch
-from tqdm import tqdm
 from datasets import Dataset, Audio
 from transformers import (
     AutoProcessor,
@@ -11,9 +10,14 @@ from transformers import (
 )
 
 
+# "openai/whisper-tiny.en" --- No effect
+# "hf-audio/wav2vec2-bert-CV16-en" --- No effect
+# "facebook/wav2vec2-base-960h" --- No effect
+
+
 def load_model(model_name: str = "facebook/wav2vec2-base-960h"):
     processor = AutoProcessor.from_pretrained(model_name)
-    model = Wav2Vec2ForCTC.from_pretrained(model_name)
+    model = WhisperForConditionalGeneration.from_pretrained(model_name)
 
     return processor, model
 
@@ -49,7 +53,7 @@ def calculcate_unique_forms(transcription: str):
 
 
 if __name__ == "__main__":
-    single_words = get_audio_filenames("data/vte/words")
+    single_words = get_audio_filenames("data/vte/single")
     repetitions = get_audio_filenames("data/vte/repetitions")
 
     processor, model = load_model()
