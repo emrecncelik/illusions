@@ -24,18 +24,19 @@ def silent_gap(duration: int = 10, sampling_rate: int = 16000):
     return sampling_rate, np.zeros(num_samples, dtype=np.int16)
 
 
-def concatenate_audio(input_file, N, delimiter: tuple[int, np.ndarray] = None):
+def concatenate_audio(
+    audio: tuple[int, np.ndarray], N: int, delimiter: tuple[int, np.ndarray] = None
+):
     """
     Concatenates the audio from the input file N times.
     Adds a delimiter between each repetition if provided.
     Args:
-        input_file (str): The path to the input audio file.
+        audio (str): The path to the input audio file.
         N (int): The number of times to repeat the audio.
         delimiter (tuple[int, np.ndarray], optional): A tuple delimiter sample rate and audio array. Defaults to None.
     Returns:
         tuple[np.ndarray, int]: A tuple containing the concatenated audio array and the sample rate.
     """
-    audio = wavfile.read(input_file)
     if delimiter is None:
         audio_concat = np.concatenate([audio[1] for _ in range(N)])
     else:

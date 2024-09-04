@@ -1,7 +1,7 @@
 WORDS = {
     "warren1961": [
         "tress",
-        "lame-duck",
+        "lame duck",
         "see",
         "trek",
         "seeshaw",
