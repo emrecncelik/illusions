@@ -25,6 +25,13 @@ MODELS = {
         "facebook/wav2vec2-large-960h-lv60-self",
     ],
     "wav2vec2bert": ["hf-audio/wav2vec2-bert-CV16-en"],
+    "wavlm": ["patrickvonplaten/wavlm-libri-clean-100h-base-plus"],
     "speecht5": ["microsoft/speecht5_asr"],
     "whisper": ["openai/whisper-tiny.en"],
 }
+
+
+def get_model_type_by_value(value: str):
+    for k, v in MODELS.items():
+        if value in v:
+            return k

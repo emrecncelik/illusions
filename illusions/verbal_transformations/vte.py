@@ -1,26 +1,58 @@
 import os
 import torch
+import numpy as np
 from datasets import Dataset, Audio
+from ..experiment_config import get_model_type_by_value, PROJECT_DIR
+import argparse
 from transformers import (
     AutoProcessor,
     AutoModelForCTC,
-    Wav2Vec2ForCTC,
-    Wav2Vec2BertForCTC,
-    Wav2Vec2ConformerForCTC,
     WhisperForConditionalGeneration,
+    SpeechT5ForSpeechToText,
 )
 
-# TODO fix prev changes (dirs, data dirs etc)
-# "openai/whisper-tiny.en" --- No effect
-# "hf-audio/wav2vec2-bert-CV16-en" --- No effect
-# "facebook/wav2vec2-base-960h" --- No effect
+parser = argparse.ArgumentParser(
+    description="Verbal transformation effect IO experiments."
+)
+parser.add_argument(
+    "--data_dir",
+    type=str,
+    default=os.path.join(PROJECT_DIR, "data/vte/warren1968"),
+    help=(
+        "Path to the data directory containing folders single and repetitions."
+        "Folders should contain audio files."
+    ),
+)
+parser.add_argument(
+    "--model_name",
+    type=str,
+    default="facebook/wav2vec2-base-960h",
+    help="Name of the model",
+)
+parser.add_argument(
+    "--output_dir",
+    type=str,
+    default=os.path.join(PROJECT_DIR, "results"),
+    help="Path to the output directory",
+)
+
+args = parser.parse_args()
 
 
 def load_model(model_name: str = "facebook/wav2vec2-base-960h"):
+    model_type = get_model_type_by_value(model_name)
     processor = AutoProcessor.from_pretrained(model_name)
-    model = WhisperForConditionalGeneration.from_pretrained(model_name)
 
-    return processor, model
+    if model_type in ("wav2vec2", "vaw2vec2bert"):
+        model = AutoModelForCTC.from_pretrained(model_name)
+    elif model_type == "speecht5":
+        model = SpeechT5ForSpeechToText.from_pretrained(model_name)
+    elif model_type == "whisper":
+        model = WhisperForConditionalGeneration.from_pretrained(model_name)
+    else:
+        raise ValueError(f"Model type {model_type} not supported.")
+
+    return model, processor
 
 
 def get_audio_filenames(audio_dir: str):
@@ -29,7 +61,7 @@ def get_audio_filenames(audio_dir: str):
     return filenames
 
 
-def load_dataset(filenames: list[str], sampling_rate: int = 16000):
+def load_repetition_dataset(filenames: list[str], sampling_rate: int = 16000):
     words = []
     repetitions = []
     for f in filenames:
@@ -48,41 +80,63 @@ def load_dataset(filenames: list[str], sampling_rate: int = 16000):
     ).cast_column("audio", Audio(sampling_rate=sampling_rate))
 
 
+def transcribe(
+    model: AutoModelForCTC | WhisperForConditionalGeneration,
+    processor: AutoProcessor,
+    audio: np.ndarray,
+):
+    model_type = get_model_type_by_value(model)
+    inputs = processor(audio, sampling_rate=16000, return_tensors="pt")
+
+    if model_type in ("wav2vec2", "wav2vec2bert", "wavlm"):
+        with torch.no_grad():
+            logits = model(**inputs).logits
+            predicted_ids = torch.argmax(logits, dim=-1)
+        transcription = processor.batch_decode(predicted_ids)[0]
+    elif model_type == "speecht5":
+        predicted_ids = model.generate(**inputs, max_length=100)
+        transcription = processor.batch_decode(predicted_ids, skip_special_tokens=True)[
+            0
+        ]
+    elif model_type == "whisper":
+        raise NotImplementedError("Whisper model not implemented.")
+    else:
+        raise ValueError(f"Model type {model_type} not supported.")
+
+    return transcription
+
+
 def calculcate_unique_forms(transcription: str):
     unique_forms = list(dict.fromkeys(transcription.split()))
     return unique_forms
 
 
 if __name__ == "__main__":
-    single_words = get_audio_filenames("data/vte/single")
-    repetitions = get_audio_filenames("data/vte/repetitions")
+    single = get_audio_filenames(os.path.join(args.data_dir, "single"))
+    repetitions = get_audio_filenames(os.path.join(args.data_dir, "repetitions"))
 
-    processor, model = load_model()
-    dataset = load_dataset(single_words + repetitions)
+    model, processor = load_model(args.model_name)
+    dataset = load_repetition_dataset(single + repetitions)
 
     unique_forms = []
     transcriptions = []
+    transcription_lengths = []
     for i in range(len(dataset)):
         print(f"Processing {i+1}/{len(dataset)}")
         print(f"\tWord: {dataset[i]['word']}")
         print(f"\tRep.: {dataset[i]['repetition']}")
 
-        inputs = processor(
-            dataset[i]["audio"]["array"], sampling_rate=16000, return_tensors="pt"
-        )
+        transcription = transcribe(model, processor, dataset[i]["audio"])
 
-        with torch.no_grad():
-            logits = model(**inputs).logits
-            predicted_ids = torch.argmax(logits, dim=-1)
-
-        transcription = processor.batch_decode(predicted_ids)[0]
         unique_forms.append(calculcate_unique_forms(transcription))
+        transcription_lengths.append(len(transcription.split()))
         transcriptions.append(transcription)
+        print(f"\tTranscription: {transcription}")
         print(f"\tUnique forms: {unique_forms[-1]}")
 
     unique_forms = ["|".join(form) for form in unique_forms]
     dataset = dataset.add_column("transcription", transcriptions)
     dataset = dataset.add_column("unique_forms", unique_forms)
+    dataset = dataset.add_column("transcription_length", transcription_lengths)
     dataset = dataset.remove_columns(["audio"])
-
-    dataset.to_csv("data/vte/transcriptions.csv")
+    dataset.to_csv(os.path.join(args.output_dir, "transcriptions.csv"))
