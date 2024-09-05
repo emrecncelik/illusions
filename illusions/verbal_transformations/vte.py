@@ -3,13 +3,14 @@ import torch
 from datasets import Dataset, Audio
 from transformers import (
     AutoProcessor,
+    AutoModelForCTC,
     Wav2Vec2ForCTC,
     Wav2Vec2BertForCTC,
     Wav2Vec2ConformerForCTC,
     WhisperForConditionalGeneration,
 )
 
-
+# TODO fix prev changes (dirs, data dirs etc)
 # "openai/whisper-tiny.en" --- No effect
 # "hf-audio/wav2vec2-bert-CV16-en" --- No effect
 # "facebook/wav2vec2-base-960h" --- No effect

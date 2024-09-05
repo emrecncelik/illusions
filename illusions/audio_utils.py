@@ -18,10 +18,10 @@ def silent_gap(duration: int = 10, sampling_rate: int = 16000):
         sampling_rate (int, optional): Sampling rate for the silence to be created. Defaults to 16000.
 
     Returns:
-        tuple[np.ndarray, int]: A tuple containing the silent audio array and the sample rate.
+        tuple[int, np.ndarray]: A tuple containing the sample rate and the silent audio array.
     """
     num_samples = int(sampling_rate * (duration / 1000.0))
-    return sampling_rate, np.zeros(num_samples, dtype=np.int16)
+    return sampling_rate, np.zeros(num_samples, dtype=np.float32)
 
 
 def concatenate_audio(
@@ -41,6 +41,6 @@ def concatenate_audio(
         audio_concat = np.concatenate([audio[1] for _ in range(N)])
     else:
         audio_concat = np.concatenate(
-            [np.concatenate(audio[1], delimiter[1]) for _ in range(N)]
+            [np.concatenate((audio[1], delimiter[1])) for _ in range(N)]
         )
     return audio[0], audio_concat

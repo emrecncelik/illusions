@@ -1,4 +1,7 @@
-WORDS = {
+import os
+
+PROJECT_DIR = os.path.abspath(os.curdir)
+STIMULI = {
     "warren1961": [
         "tress",
         "lame duck",
@@ -12,4 +15,8 @@ WORDS = {
         "ripe",
         "rape",
     ],
+}
+
+MODELS = {
+    "CTC": [],
 }
