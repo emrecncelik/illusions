@@ -65,6 +65,7 @@ def load_repetition_dataset(filenames: list[str], sampling_rate: int = 16000):
     words = []
     repetitions = []
     for f in filenames:
+        f = f.split("/")[-1]
         if any(filter(str.isdigit, f)):
             word = f.split("_")[0].split("/")[-1]
             repetition = f.split("_")[1].split(".")[0]
@@ -126,7 +127,7 @@ if __name__ == "__main__":
         print(f"\tWord: {dataset[i]['word']}")
         print(f"\tRep.: {dataset[i]['repetition']}")
 
-        transcription = transcribe(model, processor, dataset[i]["audio"])
+        transcription = transcribe(model, processor, dataset[i]["audio"]["array"])
 
         unique_forms.append(calculcate_unique_forms(transcription))
         transcription_lengths.append(len(transcription.split()))
