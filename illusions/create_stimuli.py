@@ -36,7 +36,7 @@ parser.add_argument(
     "--repetitions",
     nargs="+",
     type=int,
-    default=[100, 200, 300],
+    default=None,
     help="The repetition values",
 )
 parser.add_argument(
@@ -62,11 +62,14 @@ if __name__ == "__main__":
     # Create directories for the stimuli
     STIMULI_DIR = os.path.join(args.output_dir, args.stimuli)
     SINGLE_DIR = os.path.join(STIMULI_DIR, "single")
-    REPETITIONS_DIR = os.path.join(STIMULI_DIR, "repetitions")
+
+    if args.repetitions:
+        REPETITIONS_DIR = os.path.join(STIMULI_DIR, "repetitions")
 
     os.makedirs(STIMULI_DIR, exist_ok=True)
     os.makedirs(SINGLE_DIR, exist_ok=True)
-    os.makedirs(REPETITIONS_DIR, exist_ok=True)
+    if args.repetitions:
+        os.makedirs(REPETITIONS_DIR, exist_ok=True)
 
     # Create the single word stimuli
     for stimulus in STIMULI[args.stimuli]:
@@ -80,26 +83,27 @@ if __name__ == "__main__":
             os.path.join(SINGLE_DIR, f"{stimulus}.wav"),
         )
 
-    # Create the repetition stimuli
-    audio_files = os.listdir(SINGLE_DIR)
-    audio_files = [os.path.join(SINGLE_DIR, file) for file in audio_files]
+    if args.repetitions:
+        # Create the repetition stimuli
+        audio_files = os.listdir(SINGLE_DIR)
+        audio_files = [os.path.join(SINGLE_DIR, file) for file in audio_files]
 
-    if args.gap is not None:
-        silence = silent_gap(args.gap)
+        if args.gap is not None:
+            silence = silent_gap(args.gap)
 
-    for rep in args.repetitions:
-        for audio_file in audio_files:
-            print(f"Creating repetition {rep} for {audio_file}")
-            audio = read_wav(audio_file)
-            stimulus_name = os.path.basename(audio_file).split(".")[0]
-            output_file = os.path.join(
-                REPETITIONS_DIR,
-                f"{stimulus_name}_{rep}.wav",
-            )
+        for rep in args.repetitions:
+            for audio_file in audio_files:
+                print(f"Creating repetition {rep} for {audio_file}")
+                audio = read_wav(audio_file)
+                stimulus_name = os.path.basename(audio_file).split(".")[0]
+                output_file = os.path.join(
+                    REPETITIONS_DIR,
+                    f"{stimulus_name}_{rep}.wav",
+                )
 
-            if args.gap is None:
-                audio = concatenate_audio(audio, rep)
-            else:
-                audio = concatenate_audio(audio, rep, silence)
+                if args.gap is None:
+                    audio = concatenate_audio(audio, rep)
+                else:
+                    audio = concatenate_audio(audio, rep, silence)
 
-            write_wav(audio[1], audio[0], output_file)
+                write_wav(audio[1], audio[0], output_file)
