@@ -24,7 +24,7 @@ parser.add_argument(
     help="The index of the speaker embedding",
 )
 parser.add_argument(
-    "--stimuli", type=str, default="warren1961", help="The name of the stimuli"
+    "--stimuli", type=str, default="warren1968", help="The name of the stimuli"
 )
 parser.add_argument(
     "--output_dir",
