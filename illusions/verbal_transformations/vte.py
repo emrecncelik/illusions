@@ -87,7 +87,7 @@ def transcribe(
     audio: np.ndarray,
 ):
     inputs = processor(audio, sampling_rate=16000, return_tensors="pt")
-
+    inputs = {k: v.to(device) for k, v in inputs.items()}
     if model_type in ("wav2vec2", "wav2vec2bert", "wavlm"):
         with torch.no_grad():
             logits = model(**inputs).logits
@@ -115,8 +115,11 @@ if __name__ == "__main__":
     single = get_audio_filenames(os.path.join(args.data_dir, "single"))
     repetitions = get_audio_filenames(os.path.join(args.data_dir, "repetitions"))
 
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model_type = get_model_type_by_value(args.model_name)
     model, processor = load_model(args.model_name, model_type)
+    model = model.to(device)
+
     dataset = load_repetition_dataset(single + repetitions)
 
     unique_forms = []
