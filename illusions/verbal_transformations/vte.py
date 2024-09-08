@@ -39,8 +39,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-def load_model(model_name: str = "facebook/wav2vec2-base-960h"):
-    model_type = get_model_type_by_value(model_name)
+def load_model(model_name: str = "facebook/wav2vec2-base-960h", model_type: str = None):
     processor = AutoProcessor.from_pretrained(model_name)
 
     if model_type in ("wav2vec2", "vaw2vec2bert"):
@@ -83,10 +82,10 @@ def load_repetition_dataset(filenames: list[str], sampling_rate: int = 16000):
 
 def transcribe(
     model: AutoModelForCTC | WhisperForConditionalGeneration,
+    model_type: str,
     processor: AutoProcessor,
     audio: np.ndarray,
 ):
-    model_type = get_model_type_by_value(model)
     inputs = processor(audio, sampling_rate=16000, return_tensors="pt")
 
     if model_type in ("wav2vec2", "wav2vec2bert", "wavlm"):
@@ -116,7 +115,8 @@ if __name__ == "__main__":
     single = get_audio_filenames(os.path.join(args.data_dir, "single"))
     repetitions = get_audio_filenames(os.path.join(args.data_dir, "repetitions"))
 
-    model, processor = load_model(args.model_name)
+    model_type = get_model_type_by_value(args.model_name)
+    model, processor = load_model(args.model_name, model_type)
     dataset = load_repetition_dataset(single + repetitions)
 
     unique_forms = []
@@ -127,7 +127,9 @@ if __name__ == "__main__":
         print(f"\tWord: {dataset[i]['word']}")
         print(f"\tRep.: {dataset[i]['repetition']}")
 
-        transcription = transcribe(model, processor, dataset[i]["audio"]["array"])
+        transcription = transcribe(
+            model, model_type, processor, dataset[i]["audio"]["array"]
+        )
 
         unique_forms.append(calculcate_unique_forms(transcription))
         transcription_lengths.append(len(transcription.split()))
