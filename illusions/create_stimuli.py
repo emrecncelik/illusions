@@ -73,6 +73,7 @@ if __name__ == "__main__":
 
     # Create the single word stimuli
     for stimulus in STIMULI[args.stimuli]:
+        stimulus = stimulus.replace(" ", "-")
         print(f"Creating stimulus for {stimulus}")
         speech = synthesiser(
             stimulus, forward_params={"speaker_embeddings": speaker_embedding}
