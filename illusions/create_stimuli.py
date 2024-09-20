@@ -20,7 +20,7 @@ parser.add_argument(
 parser.add_argument(
     "--speaker_embed_idx",
     type=int,
-    default=200,
+    default=150,
     help="The index of the speaker embedding",
 )
 parser.add_argument(
