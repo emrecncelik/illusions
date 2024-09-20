@@ -5,7 +5,13 @@ from transformers import pipeline, set_seed
 from datasets import load_dataset
 
 from experiment_config import STIMULI, PROJECT_DIR
-from audio_utils import concatenate_audio, silent_gap, read_wav, write_wav
+from audio_utils import (
+    concatenate_audio,
+    silent_gap,
+    read_wav,
+    write_wav,
+    remove_silent_edges,
+)
 
 
 parser = argparse.ArgumentParser(
@@ -41,6 +47,12 @@ parser.add_argument(
 )
 parser.add_argument(
     "--gap", type=float, default=None, help="The silent gap duration in milliseconds."
+)
+parser.add_argument(
+    "--remove_silent_edges",
+    default=False,
+    action="store_true",
+    help="Whether to remove silent edges from the audio",
 )
 
 args = parser.parse_args()
@@ -78,6 +90,13 @@ if __name__ == "__main__":
         speech = synthesiser(
             stimulus, forward_params={"speaker_embeddings": speaker_embedding}
         )
+
+        if args.remove_silent_edges:
+            speech["audio"] = remove_silent_edges(
+                speech["audio"],
+                energy_threshold=0.001,  # better val. to catch consonant endings
+            )
+
         write_wav(
             speech["audio"],
             speech["sampling_rate"],

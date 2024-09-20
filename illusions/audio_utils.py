@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.io import wavfile
+from vad import EnergyVAD
 
 
 def read_wav(audio_file: str):
@@ -44,3 +45,19 @@ def concatenate_audio(
             [np.concatenate((audio[1], delimiter[1])) for _ in range(N)]
         )
     return audio[0], audio_concat
+
+
+def remove_silent_edges(audio: np.ndarray, **kwargs):
+    vad = EnergyVAD(**kwargs)
+    voice_activity = vad(audio)
+    indices = np.where(voice_activity == 1)[0]
+    start = indices[0]
+    end = indices[-1]
+
+    voice_activity[start:end] = 1
+    new_waveform = []
+    for i in range(len(voice_activity)):
+        if voice_activity[i] == 1:
+            new_waveform.append(audio[i * 320 : (i + 1) * 320])
+    new_waveform = np.concatenate(new_waveform)
+    return new_waveform
