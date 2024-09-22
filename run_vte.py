@@ -3,7 +3,7 @@ import torch
 import argparse
 import numpy as np
 from datasets import Dataset, Audio
-from illusions.experiment_config import get_model_type_by_value, PROJECT_DIR
+from illusions.config import get_model_type_by_value, PROJECT_DIR
 from transformers import (
     AutoProcessor,
     AutoModelForCTC,
