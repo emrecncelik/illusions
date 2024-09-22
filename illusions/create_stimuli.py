@@ -5,7 +5,7 @@ from scipy.io import wavfile
 from datasets import load_dataset
 from transformers import pipeline, set_seed
 
-from .experiment_config import STIMULI, PROJECT_DIR
+from .config import STIMULI, PROJECT_DIR
 from .stimuli import (
     concatenate_audio,
     silent_gap,
