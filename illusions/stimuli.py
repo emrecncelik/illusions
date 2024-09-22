@@ -10,7 +10,16 @@ def load_syntesizer(
     model_name: str = "microsoft/speecht5_tts",
     speaker_embed_idx: int = 150,
     device: str = "cpu",
-):
+) -> tuple[transformers.Pipeline, torch.Tensor]:
+    """
+    Load a text-to-speech synthesizer and speaker embedding.
+    Args:
+        model_name (str, optional): The name of the TTS model to use. Defaults to "microsoft/speecht5_tts".
+        speaker_embed_idx (int, optional): The index of the speaker embedding to use from Matthijs/cmu-arctic-xvectors dataset. Defaults to 150.
+        device (str, optional): The device to run the model on. Defaults to "cpu".
+    Returns:
+        Tuple[pipeline, torch.Tensor]: A tuple containing the synthesizer pipeline and the speaker embedding tensor.
+    """
     synthesizer = pipeline("text-to-speech", model_name, device=device)
     embeddings_dataset = load_dataset(
         "Matthijs/cmu-arctic-xvectors", split="validation"
@@ -24,6 +33,7 @@ def load_syntesizer(
 def text2speech(
     text: str, synthesizer: transformers.Pipeline, speaker_embedding: torch.Tensor
 ):
+    """Obvious I think"""
     speech = synthesizer(text, forward_params={"speaker_embeddings": speaker_embedding})
     return speech
 
@@ -65,6 +75,14 @@ def concatenate_audio(
 
 
 def remove_silent_edges(audio: np.ndarray, **kwargs):
+    """
+    If given audio has silent parts at the beginning and end, this function removes them.
+    Args:
+        audio (np.ndarray): The input audio waveform.
+        **kwargs: Additional keyword arguments to be passed to EnergyVAD.
+    Returns:
+        np.ndarray: The new waveform with silent edges removed.
+    """
     vad = EnergyVAD(**kwargs)
     voice_activity = vad(audio)
     indices = np.where(voice_activity == 1)[0]
