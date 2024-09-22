@@ -1,15 +1,9 @@
 import os
 import torch
 import argparse
-import numpy as np
 from datasets import Dataset, Audio
 from illusions.config import get_model_type_by_value, PROJECT_DIR
-from transformers import (
-    AutoProcessor,
-    AutoModelForCTC,
-    WhisperForConditionalGeneration,
-    SpeechT5ForSpeechToText,
-)
+from illusions.speech2text import load_model, transcribe
 
 parser = argparse.ArgumentParser(
     description="Verbal transformation effect IO experiments."
@@ -39,21 +33,6 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-def load_model(model_name: str = "facebook/wav2vec2-base-960h", model_type: str = None):
-    processor = AutoProcessor.from_pretrained(model_name)
-
-    if model_type in ("wav2vec2", "wav2vec2bert", "vawlm"):
-        model = AutoModelForCTC.from_pretrained(model_name)
-    elif model_type == "speecht5":
-        model = SpeechT5ForSpeechToText.from_pretrained(model_name)
-    elif model_type == "whisper":
-        model = WhisperForConditionalGeneration.from_pretrained(model_name)
-    else:
-        raise ValueError(f"Model type {model_type} not supported.")
-
-    return model, processor
-
-
 def get_audio_filenames(audio_dir: str):
     filenames = os.listdir(audio_dir)
     filenames = [os.path.join(audio_dir, f) for f in filenames if f.endswith(".wav")]
@@ -78,33 +57,6 @@ def load_repetition_dataset(filenames: list[str], sampling_rate: int = 16000):
     return Dataset.from_dict(
         {"audio": filenames, "word": words, "repetition": repetitions}
     ).cast_column("audio", Audio(sampling_rate=sampling_rate))
-
-
-def transcribe(
-    model: AutoModelForCTC | WhisperForConditionalGeneration,
-    model_type: str,
-    processor: AutoProcessor,
-    audio: np.ndarray,
-    device: torch.device,
-):
-    inputs = processor(audio, sampling_rate=16000, return_tensors="pt")
-    inputs = {k: v.to(device) for k, v in inputs.items()}
-    if model_type in ("wav2vec2", "wav2vec2bert", "wavlm"):
-        with torch.no_grad():
-            logits = model(**inputs).logits
-            predicted_ids = torch.argmax(logits, dim=-1)
-        transcription = processor.batch_decode(predicted_ids)[0]
-    elif model_type == "speecht5":
-        predicted_ids = model.generate(**inputs, max_length=100)
-        transcription = processor.batch_decode(predicted_ids, skip_special_tokens=True)[
-            0
-        ]
-    elif model_type == "whisper":
-        raise NotImplementedError("Whisper model not implemented.")
-    else:
-        raise ValueError(f"Model type {model_type} not supported.")
-
-    return transcription
 
 
 def calculcate_unique_forms(transcription: str):
