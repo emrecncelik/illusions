@@ -1,9 +1,9 @@
 import os
 import torch
+import argparse
 import numpy as np
 from datasets import Dataset, Audio
-from ..experiment_config import get_model_type_by_value, PROJECT_DIR
-import argparse
+from experiment_config import get_model_type_by_value, PROJECT_DIR
 from transformers import (
     AutoProcessor,
     AutoModelForCTC,
