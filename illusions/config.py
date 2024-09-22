@@ -15,6 +15,7 @@ STIMULI = {
         "ripe",
         "rape",
     ],
+    "natsoulas1965": ["parrot", "dollar", "seven", "bottom"],
 }
 
 MODELS = {
