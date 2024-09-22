@@ -3,7 +3,7 @@ import torch
 import argparse
 import numpy as np
 from datasets import Dataset, Audio
-from experiment_config import get_model_type_by_value, PROJECT_DIR
+from .experiment_config import get_model_type_by_value, PROJECT_DIR
 from transformers import (
     AutoProcessor,
     AutoModelForCTC,
@@ -85,6 +85,7 @@ def transcribe(
     model_type: str,
     processor: AutoProcessor,
     audio: np.ndarray,
+    device: torch.device,
 ):
     inputs = processor(audio, sampling_rate=16000, return_tensors="pt")
     inputs = {k: v.to(device) for k, v in inputs.items()}
@@ -131,7 +132,11 @@ if __name__ == "__main__":
         print(f"\tRep.: {dataset[i]['repetition']}")
 
         transcription = transcribe(
-            model, model_type, processor, dataset[i]["audio"]["array"]
+            model,
+            model_type,
+            processor,
+            dataset[i]["audio"]["array"],
+            device,
         )
 
         unique_forms.append(calculcate_unique_forms(transcription))
