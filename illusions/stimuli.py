@@ -1,14 +1,31 @@
+import torch
+import transformers
 import numpy as np
-from scipy.io import wavfile
+from transformers import pipeline
+from datasets import load_dataset
 from vad import EnergyVAD
 
 
-def read_wav(audio_file: str):
-    return wavfile.read(audio_file)
+def load_syntesizer(
+    model_name: str = "microsoft/speecht5_tts",
+    speaker_embed_idx: int = 150,
+    device: str = "cpu",
+):
+    synthesizer = pipeline("text-to-speech", model_name, device=device)
+    embeddings_dataset = load_dataset(
+        "Matthijs/cmu-arctic-xvectors", split="validation"
+    )
+    speaker_embedding = torch.tensor(
+        embeddings_dataset[speaker_embed_idx]["xvector"]
+    ).unsqueeze(0)
+    return synthesizer, speaker_embedding
 
 
-def write_wav(audio: np.ndarray, sample_rate: int, output_file: str):
-    wavfile.write(output_file, sample_rate, audio)
+def text2speech(
+    text: str, synthesizer: transformers.Pipeline, speaker_embedding: torch.Tensor
+):
+    speech = synthesizer(text, forward_params={"speaker_embeddings": speaker_embedding})
+    return speech
 
 
 def silent_gap(duration: int = 10, sampling_rate: int = 16000):

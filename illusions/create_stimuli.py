@@ -1,15 +1,14 @@
 import os
 import torch
 import argparse
-from transformers import pipeline, set_seed
+from scipy.io import wavfile
 from datasets import load_dataset
+from transformers import pipeline, set_seed
 
-from experiment_config import STIMULI, PROJECT_DIR
-from audio_utils import (
+from .experiment_config import STIMULI, PROJECT_DIR
+from .stimuli import (
     concatenate_audio,
     silent_gap,
-    read_wav,
-    write_wav,
     remove_silent_edges,
 )
 
@@ -30,7 +29,10 @@ parser.add_argument(
     help="The index of the speaker embedding",
 )
 parser.add_argument(
-    "--stimuli", type=str, default="warren1968", help="The name of the stimuli"
+    "--stimuli",
+    type=str,
+    default="warren1968",
+    help="The name of the stimuli set.",
 )
 parser.add_argument(
     "--output_dir",
@@ -97,10 +99,10 @@ if __name__ == "__main__":
                 energy_threshold=0.001,  # better val. to catch consonant endings
             )
 
-        write_wav(
-            speech["audio"],
-            speech["sampling_rate"],
+        wavfile.write(
             os.path.join(SINGLE_DIR, f"{stimulus}.wav"),
+            speech["sampling_rate"],
+            speech["audio"],
         )
 
     if args.repetitions:
@@ -114,7 +116,7 @@ if __name__ == "__main__":
         for rep in args.repetitions:
             for audio_file in audio_files:
                 print(f"Creating repetition {rep} for {audio_file}")
-                audio = read_wav(audio_file)
+                audio = wavfile.read(audio_file)
                 stimulus_name = os.path.basename(audio_file).split(".")[0]
                 output_file = os.path.join(
                     REPETITIONS_DIR,
@@ -126,4 +128,4 @@ if __name__ == "__main__":
                 else:
                     audio = concatenate_audio(audio, rep, silence)
 
-                write_wav(audio[1], audio[0], output_file)
+                wavfile.write(output_file, audio[0], audio[1])
