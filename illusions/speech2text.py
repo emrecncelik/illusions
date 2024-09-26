@@ -30,7 +30,8 @@ def transcribe(
     audio: np.ndarray,
     device: torch.device,
 ):
-    inputs = processor(audio, sampling_rate=16000, return_tensors="pt")
+
+    inputs = processor(audio=audio, sampling_rate=16000, return_tensors="pt")
     inputs = {k: v.to(device) for k, v in inputs.items()}
     if model_type in ("wav2vec2", "wav2vec2bert", "wavlm"):
         with torch.no_grad():
