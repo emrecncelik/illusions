@@ -14,6 +14,7 @@ STIMULI = {
         # "our ship has sailed",
         "ripe",
         "rape",
+        "flime",
     ],
     "natsoulas1965": [
         "parrot",
