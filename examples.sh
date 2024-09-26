@@ -1,14 +1,23 @@
-# Create stimuli set for warren1968 with 20ms gaps
-# with 50, 100, 200, and 300 repetitions. Silent parts 
-# of the beggining and end of the stimuli are removed.
-# python run_stimuli_generation.py \
-#     --repetitions 50 100 200 300 \
-#     --gap 20 \
-#     --remove_silent_edges
-
-# Same for natsoulas1965 stimuli
 python run_stimuli_generation.py \
-    --stimuli natsoulas1965 \
-    --repetitions 50 100 200 300 \
+    --repetitions 50 100 200 \
+    --gap 5 \
+    --remove_silent_edges \
+    --speaker_embed_idx 1000 \
+
+python run_stimuli_generation.py \
+    --repetitions 50 100 200\
     --gap 20 \
-    --remove_silent_edges
+    --remove_silent_edges \
+    --speaker_embed_idx 1000 \
+
+python run_stimuli_generation.py \
+    --repetitions 50 100 200 \
+    --gap 50 \
+    --remove_silent_edges \
+    --speaker_embed_idx 1000 \
+
+python run_stimuli_generation.py \
+    --repetitions 50 100 200 \
+    --gap 100 \
+    --remove_silent_edges \
+    --speaker_embed_idx 1000 \
