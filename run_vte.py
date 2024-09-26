@@ -42,6 +42,7 @@ def get_audio_filenames(audio_dir: str):
 def load_repetition_dataset(filenames: list[str], sampling_rate: int = 16000):
     words = []
     repetitions = []
+    gaps = []
     for f in filenames:
         f = f.split("/")[-1]
         if any(filter(str.isdigit, f)):
@@ -49,23 +50,38 @@ def load_repetition_dataset(filenames: list[str], sampling_rate: int = 16000):
 
             if f.count("_") > 1:
                 repetition = f.split("_")[-2]
+                gap = f.split("_")[-1].split(".")[0]
             else:
                 repetition = f.split("_")[1].split(".")[0]
+                gap = None
         else:
             word = f.split(".")[0].split("/")[-1]
             repetition = 1
+            gap = None
 
+        gaps.append(gap)
         words.append(word)
         repetitions.append(int(repetition))
 
     return Dataset.from_dict(
-        {"audio": filenames, "word": words, "repetition": repetitions}
+        {"audio": filenames, "word": words, "repetition": repetitions, "gap": gaps}
     ).cast_column("audio", Audio(sampling_rate=sampling_rate))
 
 
 def calculcate_unique_forms(transcription: str):
     unique_forms = list(dict.fromkeys(transcription.split()))
     return unique_forms
+
+
+def calculate_transitions(transcription: str):
+    num_transitions = 0
+    loc_transitions = []
+    words = transcription.split()
+    for i in range(len(words) - 1):
+        if words[i] != words[i + 1]:
+            num_transitions += 1
+            loc_transitions.append(i)
+    return num_transitions, loc_transitions
 
 
 if __name__ == "__main__":
@@ -80,6 +96,7 @@ if __name__ == "__main__":
     dataset = load_repetition_dataset(single + repetitions)
 
     unique_forms = []
+    transitions = []
     transcriptions = []
     transcription_lengths = []
     for i in range(len(dataset)):
@@ -96,10 +113,13 @@ if __name__ == "__main__":
         )
 
         unique_forms.append(calculcate_unique_forms(transcription))
+        transitions.append(calculate_transitions(transcription))
         transcription_lengths.append(len(transcription.split()))
         transcriptions.append(transcription)
         print(f"\tTranscription: {transcription}")
         print(f"\tUnique forms: {unique_forms[-1]}")
+        print(f"\tNum. transitions: {transitions[-1][0]}")
+        print(f"\tLoc. of transitions: {transitions[-1][1]}")
 
     unique_forms = ["|".join(form) for form in unique_forms]
     dataset = dataset.add_column("transcription", transcriptions)
