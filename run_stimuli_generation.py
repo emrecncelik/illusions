@@ -118,10 +118,12 @@ if __name__ == "__main__":
                 print(f"Creating repetition {rep} for {audio_file}")
                 audio = wavfile.read(audio_file)
                 stimulus_name = os.path.basename(audio_file).split(".")[0]
-                output_file = os.path.join(
-                    REPETITIONS_DIR,
-                    f"{stimulus_name}_{rep}.wav",
+                filename = (
+                    f"{stimulus_name}_{rep}_{int(args.gap)}.wav"
+                    if args.gap
+                    else f"{stimulus_name}_{rep}.wav"
                 )
+                output_file = os.path.join(REPETITIONS_DIR, filename)
 
                 if args.gap is None:
                     audio = concatenate_audio(audio, rep)

@@ -46,7 +46,11 @@ def load_repetition_dataset(filenames: list[str], sampling_rate: int = 16000):
         f = f.split("/")[-1]
         if any(filter(str.isdigit, f)):
             word = f.split("_")[0].split("/")[-1]
-            repetition = f.split("_")[1].split(".")[0]
+
+            if f.count("_") > 1:
+                repetition = f.split("_")[-2]
+            else:
+                repetition = f.split("_")[1].split(".")[0]
         else:
             word = f.split(".")[0].split("/")[-1]
             repetition = 1
