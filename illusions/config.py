@@ -4,7 +4,7 @@ PROJECT_DIR = os.path.abspath(os.curdir)
 STIMULI = {
     "warren1968": [
         "tress",
-        "lame-duck",
+        "lameduck",
         "see",
         "trek",
         "seeshaw",
