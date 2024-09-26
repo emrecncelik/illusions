@@ -4,18 +4,27 @@ PROJECT_DIR = os.path.abspath(os.curdir)
 STIMULI = {
     "warren1968": [
         "tress",
-        "lame duck",
+        "lame-duck",
         "see",
         "trek",
         "seeshaw",
         "trice",
         "fill-up",
         "truce",
-        "our ship has sailed",
+        # "our ship has sailed",
         "ripe",
         "rape",
     ],
-    "natsoulas1965": ["parrot", "dollar", "seven", "bottom"],
+    "natsoulas1965": [
+        "parrot",
+        "dollar",
+        "seven",
+        "bottom",
+        "tarrop",
+        "rollad",
+        "neves",
+        "mottob",
+    ],
 }
 
 MODELS = {
