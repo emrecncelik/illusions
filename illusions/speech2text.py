@@ -11,7 +11,7 @@ from transformers import (
 def load_model(model_name: str = "facebook/wav2vec2-base-960h", model_type: str = None):
     processor = AutoProcessor.from_pretrained(model_name)
 
-    if model_type in ("wav2vec2", "wav2vec2bert", "vawlm"):
+    if model_type in ("wav2vec2", "wav2vec2bert", "wavlm"):
         model = AutoModelForCTC.from_pretrained(model_name)
     elif model_type == "speecht5":
         model = SpeechT5ForSpeechToText.from_pretrained(model_name)
