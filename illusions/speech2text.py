@@ -39,7 +39,7 @@ def transcribe(
             predicted_ids = torch.argmax(logits, dim=-1)
         transcription = processor.batch_decode(predicted_ids)[0]
     elif model_type == "speecht5":
-        predicted_ids = model.generate(**inputs, max_length=100)
+        predicted_ids = model.generate(**inputs, max_length=300)
         transcription = processor.batch_decode(predicted_ids, skip_special_tokens=True)[
             0
         ]
