@@ -6,6 +6,37 @@ from datasets import load_dataset
 from vad import EnergyVAD
 
 
+class Noise:
+    @staticmethod
+    def gaussian(
+        audio: np.ndarray,
+        noise_level: float = 0.1,
+        mu: float = 0,
+        sigma: float = 1,
+    ) -> np.ndarray:
+        noise = np.random.normal(mu, sigma, audio.shape)
+        return audio + noise * noise_level
+
+    @staticmethod
+    def uniform(
+        audio: np.ndarray,
+        noise_level: float = 0.1,
+        low: float = -1,
+        high: float = 1,
+    ) -> np.ndarray:
+        noise = np.random.uniform(low, high, audio.shape)
+        return audio + noise * noise_level
+
+    @staticmethod
+    def poisson(
+        audio: np.ndarray,
+        noise_level: float = 0.1,
+        lam: float = 1,
+    ) -> np.ndarray:
+        noise = np.random.poisson(lam, audio.shape)
+        return audio + noise * noise_level
+
+
 def load_syntesizer(
     model_name: str = "microsoft/speecht5_tts",
     speaker_embed_idx: int = 150,
