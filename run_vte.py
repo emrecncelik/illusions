@@ -4,6 +4,7 @@ import argparse
 from datasets import Dataset, Audio
 from illusions.config import get_model_type_by_value, PROJECT_DIR
 from illusions.speech2text import load_model, transcribe
+from illusions.stimuli import Noise
 
 parser = argparse.ArgumentParser(
     description="Verbal transformation effect IO experiments."
@@ -28,6 +29,20 @@ parser.add_argument(
     type=str,
     default=os.path.join(PROJECT_DIR, "results"),
     help="Path to the output directory",
+)
+
+parser.add_argument(
+    "--input_noise",
+    type=str,
+    default=None,
+    help="Noise type to add to the input audio",
+)
+
+parser.add_argument(
+    "--noise_level",
+    type=float,
+    default=0.1,
+    help="Noise level to add to the input audio",
 )
 
 args = parser.parse_args()
@@ -103,6 +118,15 @@ if __name__ == "__main__":
         print(f"Processing {i+1}/{len(dataset)}")
         print(f"\tWord: {dataset[i]['word']}")
         print(f"\tRep.: {dataset[i]['repetition']}")
+
+        audio = dataset[i]["audio"]["array"]
+        if args.input_noise:
+            if args.input_noise == "gaussian":
+                audio = Noise.gaussian(audio, noise_level=args.noise_level)
+            elif args.input_noise == "uniform":
+                audio = Noise.uniform(audio, noise_level=args.noise_level)
+            elif args.input_noise == "poisson":
+                audio = Noise.poisson(audio, noise_level=args.noise_level)
 
         transcription = transcribe(
             model,
